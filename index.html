@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script
+      src="https://code.jquery.com/jquery-3.7.0.js"
+      integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!--Font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cagliostro&family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <!---->
+    <title>FastFingers</title>
+  </head>
+  <body class="font-cagliostro bg-neutral-950 flex flex-col text-white">
+    <div class="flex justify-center my-14 text-4xl">
+      <a href="http://127.0.0.1:5500/index.html"
+        >Fast<span class="text-blue-500">Finger</span>s</a
+      >
+    </div>
+    <div class="flex flex-col space-y-4 max-w-3xl mx-auto p-10">
+      <div
+        class="bg-neutral-900 font-roboto rounded-sm p-4 text-2xl h-24 tracking-wider"
+      >
+        <p>nine low at rule study been picture practise oh whether</p>
+        <p>through equal one garden fice soil plain step vary</p>
+      </div>
+      <div class="flex h-12 space-x-4">
+        <input
+          type="text"
+          class="w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border focus:border-blue-500 outline-none transition focus:shadow-3xl"
+        />
+        <div class="flex space-x-4">
+          <div
+            class="h-full my-auto text-3xl bg-neutral-900 rounded-sm flex items-center justify-center w-28"
+          >
+            <div class="flex space-x-1 items-center justify-center">
+              <span>0</span>
+              <span class="text-lg">WMP</span>
+            </div>
+          </div>
+          <div
+            class="text-2xl bg-neutral-900 rounded-sm flex items-center justify-center w-28"
+          >
+            <span>0:30</span>
+          </div>
+          <button
+            class="rounded-sm bg-neutral-900 flex justify-center items-center w-24 hover:bg-blue-500 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              id="refresh-icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <polyline points="23 20 23 14 17 14"></polyline>
+              <path
+                d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col w-80 justify-center text-lg">
+        <div class="h-20 flex justify-center items-center">
+          <p class="text-4xl">47 <span class="text-xl">WPM</span></p>
+        </div>
+        <div class="flex justify-between bg-neutral-900 rounded-sm px-4 py-2">
+          <p>Raw WMP</p>
+          <p>64</p>
+        </div>
+        <div class="flex justify-between rounded-sm px-4 py-2">
+          <p>Accuracy</p>
+          <div class="flex">
+            <p>73.1</p>
+            <span>%</span>
+          </div>
+        </div>
+        <div class="flex justify-between bg-neutral-900 rounded-sm px-4 py-2">
+          <p>Correct Characters</p>
+          <p>117</p>
+        </div>
+        <div class="flex justify-between rounded-sm px-4 py-2">
+          <p>Incorrect Characters</p>
+          <p>43</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
