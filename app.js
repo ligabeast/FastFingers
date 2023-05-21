@@ -1954,41 +1954,30 @@ const wordList = [
   "zulu",
 ];
 
-function generateSentence(event) {
-  let sentence = [];
-  while (
-    sentence.reduce((acc, val) => acc + val.length, 0) + sentence.length - 1 <
-    43
-  ) {
-    sentence.push(wordList[Math.floor(Math.random() * wordList.length) + 1]);
-  }
-  return sentence;
-}
-
 Vue.createApp({
   data() {
     return {
-      timer_seconds: "10",
-      firstSentenceArray: [],
-      secondSentenceArray: [],
-      firstSentence: "",
-      secondSentence: "",
+      timerSeconds: "10",
+      highlightStyle: "Character",
+      firstSentence: [],
+      secondSentence: [],
+      firstSentenceColor: [],
+      secondSentenceColor: [],
       running: false,
     };
   },
   methods: {
     start(event) {
       const value = event.target.value;
-      console.log(value);
       if (!this.running) {
         this.countDownTimer();
         this.running = true;
       }
     },
     countDownTimer() {
-      if (this.timer_seconds > 0) {
+      if (this.timerSeconds > 0) {
         setTimeout(() => {
-          this.timer_seconds--;
+          this.timerSeconds--;
           this.countDownTimer();
         }, 1000);
       } else {
@@ -1997,17 +1986,48 @@ Vue.createApp({
     },
     timerEndHandler() {
       $("#wordInput").prop("disabled", true);
-      $("#wordInput").addClass("text-neutral-600");
+      $("#wordInput").addClass("text-neutral-700");
       $("#wordInput").removeClass("text-white");
     },
+    generateSentence(event) {
+      let sentence = [];
+      while (
+        sentence.reduce((acc, val) => acc + val.length, 0) +
+          sentence.length -
+          1 <
+        43
+      ) {
+        sentence.push(
+          wordList[Math.floor(Math.random() * wordList.length) + 1].split("")
+        );
+      }
+      return sentence;
+    },
+    generateColorArray(arr) {
+      let colorArr = [];
+      for (word of arr) {
+        colorArr.push([]);
+        for (char of word) {
+          colorArr[colorArr.length - 1].push("text-white");
+        }
+      }
+      return colorArr;
+    },
     generateTest(event) {
-      this.firstSentenceArray = generateSentence();
-      this.secondSentenceArray = generateSentence();
-      this.firstSentence = this.firstSentenceArray.join(" ");
-      this.secondSentence = this.secondSentenceArray.join(" ");
+      const first = this.generateSentence();
+      const second = this.generateSentence();
+      this.firstSentence = first;
+      this.secondSentence = second;
+      this.firstSentenceColor = this.generateColorArray(first);
+      this.secondSentenceColor = this.generateColorArray(second);
       $("#wordInput").prop("disabled", false);
       $("#wordInput").addClass("text-white");
-      $("#wordInput").removeClass("text-neutral-600");
+      $("#wordInput").removeClass("text-neutral-700");
+    },
+    getClass(index1, index2) {
+      return {
+        [this.firstSentence[index1][index2]]: true,
+      };
     },
   },
   beforeMount() {
@@ -2017,7 +2037,6 @@ Vue.createApp({
 
 $(document).ready(function () {
   $("#generateTest").click(function () {
-    console.log($("#generateTestSVG"));
     $("#generateTestSVG").toggleClass("rotate-180");
   });
 });
