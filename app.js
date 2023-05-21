@@ -2024,11 +2024,6 @@ Vue.createApp({
       $("#wordInput").addClass("text-white");
       $("#wordInput").removeClass("text-neutral-700");
     },
-    getClass(index1, index2) {
-      return {
-        [this.firstSentence[index1][index2]]: true,
-      };
-    },
   },
   beforeMount() {
     this.generateTest();

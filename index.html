@@ -36,9 +36,7 @@
         class="bg-neutral-900 font-roboto rounded-sm py-4 px-8 text-2xl h-24 tracking-wider"
       >
         <template v-for="[i1,word] in firstSentence">
-          <span v-for="[i2,char] in word" :class="getClass(i1,i2)">
-            {{char}}
-          </span>
+          <span v-for="[i2,char] in word"> {{char}} </span>
           <span>&nbsp;</span>
         </template>
         <br />
