@@ -11,6 +11,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!--Font-->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,13 +35,15 @@
       <div
         class="bg-neutral-900 font-roboto rounded-sm p-4 text-2xl h-24 tracking-wider"
       >
-        <p>nine low at rule study been picture practise oh whether</p>
-        <p>through equal one garden fice soil plain step vary</p>
+        <p>{{firstSentence}}</p>
+        <p>{{secondSentence}}</p>
       </div>
       <div class="flex h-12 space-x-4">
         <input
+          @keyup="start($event)"
           type="text"
-          class="w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border focus:border-blue-500 outline-none transition focus:shadow-3xl p-4 text-2xl"
+          id="wordInput"
+          class="font-roboto w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border focus:border-blue-500 outline-none transition focus:shadow-3xl p-4 text-2xl tracking-wider"
         />
         <div class="flex space-x-4">
           <div
@@ -54,14 +57,19 @@
           <div
             class="text-2xl bg-neutral-900 rounded-sm flex items-center justify-center w-28"
           >
-            <span>{{timer_minutes}}:{{timer_seconds}}</span>
+            <span
+              >{{Math.floor(timer_seconds / 60)}}:{{((timer_seconds % 60 < 10) ?
+              '0' : '' )+ timer_seconds % 60 }}</span
+            >
           </div>
           <button
+            @click="generateTest"
+            id="generateTest"
             class="rounded-sm bg-neutral-900 flex justify-center items-center w-24 hover:bg-blue-500 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              id="refresh-icon"
+              id="generateTestSVG"
               width="24"
               height="24"
               viewBox="0 0 24 24"
@@ -70,6 +78,7 @@
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
+              class="transition duration-300"
             >
               <polyline points="1 4 1 10 7 10"></polyline>
               <polyline points="23 20 23 14 17 14"></polyline>
