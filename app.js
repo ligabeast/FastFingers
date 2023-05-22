@@ -1961,8 +1961,8 @@ Vue.createApp({
       highlightStyle: "Character",
       firstSentence: [],
       secondSentence: [],
-      firstSentenceColor: [],
-      secondSentenceColor: [],
+      firstSentenceState: [],
+      secondSentenceState: [],
       running: false,
     };
   },
@@ -1972,6 +1972,14 @@ Vue.createApp({
       if (!this.running) {
         this.countDownTimer();
         this.running = true;
+      } else {
+        for ((word,index1) of JSON.parse(JSON.stringify(this.firstSentence))) {
+          for ((char,index2) of word) {
+            if()
+          }
+        }
+
+        console.log(currentWord);
       }
     },
     countDownTimer() {
@@ -2008,7 +2016,7 @@ Vue.createApp({
       for (word of arr) {
         colorArr.push([]);
         for (char of word) {
-          colorArr[colorArr.length - 1].push("text-white");
+          colorArr[colorArr.length - 1].push(0);
         }
       }
       return colorArr;
@@ -2018,8 +2026,8 @@ Vue.createApp({
       const second = this.generateSentence();
       this.firstSentence = first;
       this.secondSentence = second;
-      this.firstSentenceColor = this.generateColorArray(first);
-      this.secondSentenceColor = this.generateColorArray(second);
+      this.firstSentenceState = this.generateColorArray(first);
+      this.secondSentenceState = this.generateColorArray(second);
       $("#wordInput").prop("disabled", false);
       $("#wordInput").addClass("text-white");
       $("#wordInput").removeClass("text-neutral-700");

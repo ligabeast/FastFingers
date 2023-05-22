@@ -35,8 +35,16 @@
       <div
         class="bg-neutral-900 font-roboto rounded-sm py-4 px-8 text-2xl h-24 tracking-wider"
       >
-        <template v-for="[i1,word] in firstSentence">
-          <span v-for="[i2,char] in word"> {{char}} </span>
+        <template v-for="(word,i1) in firstSentence">
+          <span
+            v-for="(char,i2) in word"
+            :id="i1+i2"
+            :class="{ 'text-white' : firstSentenceState[i1][i2] == 0,
+                      'text-green' : firstSentenceState[i1][i2] == 1,
+                      'text-red' : firstSentenceState[i1][i2] == -1 }"
+          >
+            {{char}}
+          </span>
           <span>&nbsp;</span>
         </template>
         <br />
