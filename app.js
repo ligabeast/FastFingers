@@ -1957,8 +1957,9 @@ const wordList = [
 Vue.createApp({
   data() {
     return {
-      timerSeconds: "10",
+      timerSeconds: "30",
       highlightStyle: "Character",
+      currentPointer: 0,
       firstSentence: [],
       secondSentence: [],
       firstSentenceState: [],
@@ -1968,18 +1969,44 @@ Vue.createApp({
   },
   methods: {
     start(event) {
-      const value = event.target.value;
+      const currentInput = event.target.value;
       if (!this.running) {
         this.countDownTimer();
         this.running = true;
-      } else {
-        for ((word,index1) of JSON.parse(JSON.stringify(this.firstSentence))) {
-          for ((char,index2) of word) {
-            if()
+      }
+      let counter = 0;
+      for ([i1, word] of this.firstSentence.entries()) {
+        for ([i2, char] of word.entries()) {
+          if (this.firstSentenceState[i1][i2] < -90) {
+            continue;
+          }
+          if (counter >= currentInput.length) {
+            this.firstSentenceState[i1][i2] = 0;
+            continue;
+          }
+          if (char == currentInput[i2]) {
+            this.firstSentenceState[i1][i2] = 1;
+          } else if (currentInput[i2] != " ") {
+            this.firstSentenceState[i1][i2] = -1;
+          }
+          counter++;
+        }
+      }
+      if (currentInput.slice(-1) == " ") {
+        this.$refs.input.value = "";
+        counter = 0;
+        for ([i1, word] of this.firstSentence.entries()) {
+          for ([i2, char] of word.entries()) {
+            if (this.firstSentenceState[i1][i2] < -90) {
+              continue;
+            }
+            if (counter > currentInput.length) {
+              break;
+            }
+            this.firstSentenceState[i1][i2] = -98;
+            counter++;
           }
         }
-
-        console.log(currentWord);
       }
     },
     countDownTimer() {

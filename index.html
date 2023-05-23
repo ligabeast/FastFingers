@@ -38,10 +38,12 @@
         <template v-for="(word,i1) in firstSentence">
           <span
             v-for="(char,i2) in word"
-            :id="i1+i2"
             :class="{ 'text-white' : firstSentenceState[i1][i2] == 0,
-                      'text-green' : firstSentenceState[i1][i2] == 1,
-                      'text-red' : firstSentenceState[i1][i2] == -1 }"
+                      'text-green-600' : firstSentenceState[i1][i2] == 1,
+                      'text-red-600' : firstSentenceState[i1][i2] == -1 || firstSentenceState[i1][i2] == -98 ,
+                      'text-neutral-800' : firstSentenceState[i1][i2] == -99,
+                      'bg-neutral-700' : currentPointer == i2
+                    }"
           >
             {{char}}
           </span>
@@ -57,6 +59,7 @@
         <input
           @keyup="start($event)"
           type="text"
+          ref="input"
           id="wordInput"
           class="font-roboto w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border focus:border-blue-500 outline-none transition focus:shadow-3xl p-4 text-2xl tracking-wider"
         />
