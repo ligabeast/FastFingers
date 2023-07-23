@@ -2,13 +2,21 @@
   <div
     class="bg-neutral-900 font-roboto rounded-sm py-4 px-8 text-2xl h-24 tracking-wider"
   >
-    <typing-sentence :sentence="firstSentence"></typing-sentence>
-    <typing-sentence :sentence="secondSentence"></typing-sentence>
+    <typing-sentence
+      :sentence="firstSentence"
+      :selected="true"
+      :location="currentSentenceLocation"
+      :success="currentSentenceSuccess"
+    ></typing-sentence>
+    <typing-sentence
+      :sentence="secondSentence"
+      :selected="false"
+    ></typing-sentence>
   </div>
   <div class="flex h-12 space-x-4">
     <input
       @keyup="test"
-      autocomplete="false"
+      autocomplete="off"
       type="text"
       ref="input"
       id="wordInput"
@@ -65,9 +73,10 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import TypingSentence from "./TypingSentence.vue";
 
-export default {
+export default defineComponent({
   components: {
     TypingSentence,
   },
@@ -2027,18 +2036,39 @@ export default {
         "zoo",
         "zulu",
       ],
-      firstSentence: [""],
-      secondSentence: [""],
+      firstSentence: [[""]],
+      secondSentence: [[""]],
+      currentSentenceLocation: [[false]],
+      currentSentenceSuccess: [[false]],
       timerSeconds: 10,
       finished: false,
       running: false,
     };
   },
   methods: {
+    initialize(): void {
+      this.firstSentence = this.generateSentence();
+      this.secondSentence = this.generateSentence();
+      this.currentSentenceLocation = [];
+      this.currentSentenceSuccess = [];
+      for (const x of this.firstSentence) {
+        const tmp: boolean[] = [];
+        for (const _ of x) {
+          tmp.push(false);
+        }
+        this.currentSentenceSuccess.push(tmp);
+        this.currentSentenceLocation.push(JSON.parse(JSON.stringify(tmp)));
+      }
+      console.log(this.currentSentenceLocation);
+      console.log(this.currentSentenceSuccess);
+      this.running = false;
+      this.timerSeconds = 10;
+    },
     test(): void {
       if (!this.running) {
         this.running = true;
         this.countDownTimer();
+      } else {
       }
     },
     countDownTimer(): void {
@@ -2054,13 +2084,10 @@ export default {
       }
     },
     generateTest(): void {
-      this.firstSentence = this.generateSentence();
-      this.secondSentence = this.generateSentence();
-      this.running = false;
-      this.timerSeconds = 10;
+      this.initialize();
     },
-    generateSentence(): string[] {
-      let sentence: string[] = [];
+    generateSentence(): string[][] {
+      const sentence: string[][] = [];
       while (
         sentence.reduce((acc, val) => acc + val.length, 0) +
           sentence.length -
@@ -2068,18 +2095,18 @@ export default {
         43
       ) {
         sentence.push(
-          this.wordList[Math.floor(Math.random() * this.wordList.length) + 1]
+          this.wordList[
+            Math.floor(Math.random() * this.wordList.length) + 1
+          ].split("")
         );
       }
       return sentence;
     },
   },
   created(): void {
-    this.firstSentence = this.generateSentence();
-    this.secondSentence = this.generateSentence();
-    console.log(this.firstSentence);
+    this.initialize();
   },
-};
+});
 </script>
 
 <style></style>
