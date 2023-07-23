@@ -16,9 +16,11 @@
   <div class="flex h-12 space-x-4">
     <input
       @keyup="test"
+      @keyup.space="testSpace"
       autocomplete="off"
-      type="text"
       ref="input"
+      v-model="input"
+      type="text"
       id="wordInput"
       class="font-roboto w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border focus:border-blue-500 outline-none transition focus:shadow-3xl p-4 text-2xl tracking-wider"
     />
@@ -75,6 +77,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import TypingSentence from "./TypingSentence.vue";
+import { JSONHydrator } from "postcss";
 
 export default defineComponent({
   components: {
@@ -2036,40 +2039,79 @@ export default defineComponent({
         "zoo",
         "zulu",
       ],
+      input: "",
       firstSentence: [[""]],
       secondSentence: [[""]],
       currentSentenceLocation: [[false]],
       currentSentenceSuccess: [[false]],
+      currentWordIndex: 0,
       timerSeconds: 10,
       finished: false,
       running: false,
     };
   },
+  watch: {
+    finished(val: boolean): void {
+      if (val) {
+        const inputfield = this.$refs["input"] as HTMLInputElement;
+        inputfield.disabled = true;
+      }
+    },
+  },
   methods: {
     initialize(): void {
       this.firstSentence = this.generateSentence();
       this.secondSentence = this.generateSentence();
-      this.currentSentenceLocation = [];
-      this.currentSentenceSuccess = [];
-      for (const x of this.firstSentence) {
-        const tmp: boolean[] = [];
-        for (const _ of x) {
-          tmp.push(false);
-        }
-        this.currentSentenceSuccess.push(tmp);
-        this.currentSentenceLocation.push(JSON.parse(JSON.stringify(tmp)));
-      }
-      console.log(this.currentSentenceLocation);
-      console.log(this.currentSentenceSuccess);
+      this.currentSentenceLocation = this.generateStructer(this.firstSentence);
+      this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
       this.running = false;
+      this.finished = false;
+      this.currentWordIndex = 0;
       this.timerSeconds = 10;
+      this.input = "";
+      const inputfield = this.$refs["input"] as HTMLInputElement;
+      if (inputfield) {
+        inputfield.disabled = false;
+      }
+    },
+    switchSentences() {
+      this.firstSentence = this.secondSentence;
+      this.secondSentence = this.generateSentence();
+      this.currentWordIndex = 0;
+      this.currentSentenceLocation = this.generateStructer(this.firstSentence);
+      this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
     },
     test(): void {
       if (!this.running) {
         this.running = true;
         this.countDownTimer();
-      } else {
       }
+      for (const [index, char] of this.firstSentence[
+        this.currentWordIndex
+      ].entries()) {
+        this.currentSentenceSuccess[this.currentWordIndex][index] =
+          this.input[index] == char;
+        if (this.input.length - 1 < index) {
+          this.currentSentenceLocation[this.currentWordIndex][index] = false;
+        } else {
+          this.currentSentenceLocation[this.currentWordIndex][index] = true;
+        }
+      }
+    },
+    testSpace() {
+      let completedSentence =
+        this.currentWordIndex == this.firstSentence.length - 1;
+      if (!completedSentence) {
+        for (const [i, _] of this.currentSentenceLocation[
+          this.currentWordIndex
+        ].entries()) {
+          this.currentSentenceLocation[this.currentWordIndex][i] = true;
+        }
+        this.currentWordIndex++;
+      } else {
+        this.switchSentences();
+      }
+      this.input = "";
     },
     countDownTimer(): void {
       if (this.timerSeconds > 0) {
@@ -2101,6 +2143,17 @@ export default defineComponent({
         );
       }
       return sentence;
+    },
+    generateStructer(arr: string[][]): boolean[][] {
+      const result: boolean[][] = [];
+      for (const x of arr) {
+        const tmp: boolean[] = [];
+        for (const _ of x) {
+          tmp.push(false);
+        }
+        result.push(tmp);
+      }
+      return result;
     },
   },
   created(): void {
