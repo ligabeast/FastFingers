@@ -2167,7 +2167,7 @@ export default defineComponent({
       for (const [index, char] of this.firstSentence[
         this.currentWordIndex
       ].entries()) {
-        if (this.input[index] != char) {
+        if (this.input[index] != char && this.input.length > index) {
           currentlyCorrectWord = false;
         }
         this.currentSentenceSuccess[this.currentWordIndex][index] =
@@ -2198,6 +2198,9 @@ export default defineComponent({
         this.switchSentences();
       }
       this.input = "";
+      if (this.$store.state.highlightError) {
+        this.inputError = false;
+      }
     },
     countDownTimer(): void {
       if (this.timerSeconds > 0) {
@@ -2225,6 +2228,9 @@ export default defineComponent({
       ) {
         let word =
           this.wordList[Math.floor(Math.random() * this.wordList.length) + 1];
+        if (this.$store.state.simpleWordList && word.length > 6) {
+          continue;
+        }
         if (this.probabilityCapitalLetter >= Math.random()) {
           word = word.slice(0, 1).toUpperCase() + word.slice(1);
         }
