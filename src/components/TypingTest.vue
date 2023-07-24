@@ -36,14 +36,7 @@
       <div
         class="text-2xl bg-neutral-900 rounded-sm flex items-center justify-center w-28"
       >
-        <span>
-          {{ Math.floor(timerSeconds / 60) }} :
-          {{
-            timerSeconds % 60 >= 10
-              ? timerSeconds % 60
-              : "0" + (timerSeconds % 60)
-          }}</span
-        >
+        <span> {{ timer }} </span>
       </div>
       <button
         @click="generateTest"
@@ -77,9 +70,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import TypingSentence from "./TypingSentence.vue";
-import { JSONHydrator } from "postcss";
 
 export default defineComponent({
+  props: ["timerSecondsRef"],
   components: {
     TypingSentence,
   },
@@ -2045,7 +2038,7 @@ export default defineComponent({
       currentSentenceLocation: [[false]],
       currentSentenceSuccess: [[false]],
       currentWordIndex: 0,
-      timerSeconds: 10,
+      timerSeconds: 0,
       finished: false,
       running: false,
     };
@@ -2058,6 +2051,17 @@ export default defineComponent({
       }
     },
   },
+  computed: {
+    timer(): string {
+      let time = Math.floor(this.timerSeconds / 60).toString();
+      time += ":";
+      time +=
+        this.timerSeconds % 60 >= 10
+          ? (this.timerSeconds % 60).toString()
+          : "0" + (this.timerSeconds % 60).toString();
+      return time;
+    },
+  },
   methods: {
     initialize(): void {
       this.firstSentence = this.generateSentence();
@@ -2066,14 +2070,15 @@ export default defineComponent({
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
       this.running = false;
       this.finished = false;
+      this.timerSeconds = this.$store.state.timerSeconds;
       this.currentWordIndex = 0;
-      this.timerSeconds = 10;
       this.input = "";
       const inputfield = this.$refs["input"] as HTMLInputElement;
       if (inputfield) {
         inputfield.disabled = false;
       }
     },
+
     switchSentences() {
       this.firstSentence = this.secondSentence;
       this.secondSentence = this.generateSentence();

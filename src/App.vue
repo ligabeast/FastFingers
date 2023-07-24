@@ -5,7 +5,7 @@
     >
   </div>
   <div class="flex flex-col space-y-4 max-w-4xl mx-auto p-10">
-    <typing-test></typing-test>
+    <typing-test :timerSecondsRef="$store.timerSeconds"></typing-test>
     <div class="flex space-x-4 pt-10 items-center">
       <statistic-view></statistic-view>
       <configuration-view></configuration-view>
