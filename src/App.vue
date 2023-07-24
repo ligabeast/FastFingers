@@ -5,9 +5,9 @@
     >
   </div>
   <div class="flex flex-col space-y-4 max-w-4xl mx-auto p-10">
-    <typing-test :timerSecondsRef="$store.timerSeconds"></typing-test>
+    <typing-test @finished="showStats"></typing-test>
     <div class="flex space-x-4 pt-10 items-center">
-      <statistic-view></statistic-view>
+      <statistic-view :stats="stats"></statistic-view>
       <configuration-view></configuration-view>
     </div>
   </div>
@@ -25,6 +25,22 @@ export default defineComponent({
     TypingTest,
     StatisticView,
     ConfigurationView,
+  },
+  data() {
+    return {
+      stats: {},
+    };
+  },
+  methods: {
+    showStats(stats: {
+      correctChar: number;
+      incorrectChar: number;
+      accuracy: number;
+      rawWPM: number;
+      wpm: number;
+    }) {
+      this.stats = stats;
+    },
   },
 });
 </script>

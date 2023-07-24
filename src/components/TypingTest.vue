@@ -22,21 +22,27 @@
       v-model="input"
       type="text"
       id="wordInput"
-      class="font-roboto w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border focus:border-blue-500 outline-none transition focus:shadow-3xl p-4 text-2xl tracking-wider"
+      :class="{
+        'focus:border-red-500': inputError,
+        'focus:border-blue-500': !inputError,
+      }"
+      class="font-roboto w-1/2 bg-neutral-900 rounded-sm border-neutral-800 border outline-none transition focus:shadow-3xl p-4 text-2xl tracking-wider"
     />
     <div class="flex space-x-4">
       <div
         class="h-full my-auto text-3xl bg-neutral-900 rounded-sm flex items-center justify-center w-28"
       >
         <div class="flex space-x-1 items-center justify-center">
-          <span>0</span>
-          <span class="text-lg">WMP</span>
+          <template v-if="$store.state.showWPM">
+            <span>{{ wpm }} </span>
+            <span class="text-lg">WMP</span>
+          </template>
         </div>
       </div>
       <div
         class="text-2xl bg-neutral-900 rounded-sm flex items-center justify-center w-28"
       >
-        <span> {{ timer }} </span>
+        <span v-if="$store.state.showTimer"> {{ timer }} </span>
       </div>
       <button
         @click="generateTest"
@@ -2039,8 +2045,14 @@ export default defineComponent({
       currentSentenceSuccess: [[false]],
       currentWordIndex: 0,
       timerSeconds: 0,
+      timePast: 0,
       finished: false,
       running: false,
+      averageWordLength: 4.7,
+      probabilityCapitalLetter: 0.2,
+      correctCharacter: 0,
+      inputError: false,
+      incorrectCharacter: 0,
     };
   },
   watch: {
@@ -2048,6 +2060,33 @@ export default defineComponent({
       if (val) {
         const inputfield = this.$refs["input"] as HTMLInputElement;
         inputfield.disabled = true;
+        const accuracy = (
+          (this.correctCharacter /
+            (this.correctCharacter + this.incorrectCharacter)) *
+          100
+        ).toFixed(2);
+        const rawWPM = (
+          ((this.correctCharacter + this.incorrectCharacter) /
+            this.averageWordLength) *
+          (60 / this.$store.state.timerSeconds)
+        ).toFixed(2);
+        const wpm = (
+          (this.correctCharacter / this.averageWordLength) *
+          (60 / this.$store.state.timerSeconds)
+        ).toFixed(2);
+        const stats = {
+          correctChar: this.correctCharacter,
+          incorrectChar: this.incorrectCharacter,
+          accuracy: accuracy,
+          rawWPM: rawWPM,
+          wpm: wpm,
+        };
+        this.$emit("finished", stats);
+      }
+    },
+    timerVuex(val: number) {
+      if (!this.running) {
+        this.timerSeconds = val;
       }
     },
   },
@@ -2061,6 +2100,18 @@ export default defineComponent({
           : "0" + (this.timerSeconds % 60).toString();
       return time;
     },
+    timerVuex(): number {
+      return this.$store.state.timerSeconds;
+    },
+    wpm(): number {
+      if (this.timePast > 0) {
+        return Math.floor(
+          (this.correctCharacter / this.averageWordLength) *
+            (60 / this.timePast)
+        );
+      }
+      return 0;
+    },
   },
   methods: {
     initialize(): void {
@@ -2070,8 +2121,12 @@ export default defineComponent({
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
       this.running = false;
       this.finished = false;
+      this.inputError = false;
       this.timerSeconds = this.$store.state.timerSeconds;
+      this.timePast = 0;
       this.currentWordIndex = 0;
+      this.correctCharacter = 0;
+      this.incorrectCharacter = 0;
       this.input = "";
       const inputfield = this.$refs["input"] as HTMLInputElement;
       if (inputfield) {
@@ -2086,14 +2141,35 @@ export default defineComponent({
       this.currentSentenceLocation = this.generateStructer(this.firstSentence);
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
     },
-    test(): void {
+    test(event: KeyboardEvent): void {
+      console.log(event);
       if (!this.running) {
         this.running = true;
         this.countDownTimer();
       }
+      if (
+        event.keyCode >= 65 &&
+        event.keyCode <= 90 &&
+        this.firstSentence[this.currentWordIndex][this.input.length - 1] ==
+          this.input[this.input.length - 1]
+      ) {
+        this.correctCharacter++;
+      }
+      if (
+        event.keyCode >= 65 &&
+        event.keyCode <= 90 &&
+        this.firstSentence[this.currentWordIndex][this.input.length - 1] !=
+          this.input[this.input.length - 1]
+      ) {
+        this.incorrectCharacter++;
+      }
+      let currentlyCorrectWord = true;
       for (const [index, char] of this.firstSentence[
         this.currentWordIndex
       ].entries()) {
+        if (this.input[index] != char) {
+          currentlyCorrectWord = false;
+        }
         this.currentSentenceSuccess[this.currentWordIndex][index] =
           this.input[index] == char;
         if (this.input.length - 1 < index) {
@@ -2101,6 +2177,11 @@ export default defineComponent({
         } else {
           this.currentSentenceLocation[this.currentWordIndex][index] = true;
         }
+      }
+      if (this.$store.state.highlightError && !currentlyCorrectWord) {
+        this.inputError = true;
+      } else if (this.$store.state.highlightError) {
+        this.inputError = false;
       }
     },
     testSpace() {
@@ -2123,6 +2204,7 @@ export default defineComponent({
         setTimeout(() => {
           if (this.running) {
             this.timerSeconds--;
+            this.timePast++;
             this.countDownTimer();
           }
         }, 1000);
@@ -2141,11 +2223,12 @@ export default defineComponent({
           1 <
         43
       ) {
-        sentence.push(
-          this.wordList[
-            Math.floor(Math.random() * this.wordList.length) + 1
-          ].split("")
-        );
+        let word =
+          this.wordList[Math.floor(Math.random() * this.wordList.length) + 1];
+        if (this.probabilityCapitalLetter >= Math.random()) {
+          word = word.slice(0, 1).toUpperCase() + word.slice(1);
+        }
+        sentence.push(word.split(""));
       }
       return sentence;
     },
