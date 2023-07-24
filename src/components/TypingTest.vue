@@ -7,6 +7,8 @@
       :selected="true"
       :location="currentSentenceLocation"
       :success="currentSentenceSuccess"
+      :row="currentWordIndex"
+      :col="currentCharIndex"
     ></typing-sentence>
     <typing-sentence
       :sentence="secondSentence"
@@ -2044,6 +2046,7 @@ export default defineComponent({
       currentSentenceLocation: [[false]],
       currentSentenceSuccess: [[false]],
       currentWordIndex: 0,
+      currentCharIndex: 0,
       timerSeconds: 0,
       timePast: 0,
       finished: false,
@@ -2125,6 +2128,7 @@ export default defineComponent({
       this.timerSeconds = this.$store.state.timerSeconds;
       this.timePast = 0;
       this.currentWordIndex = 0;
+      this.currentCharIndex = 0;
       this.correctCharacter = 0;
       this.incorrectCharacter = 0;
       this.input = "";
@@ -2164,6 +2168,7 @@ export default defineComponent({
         this.incorrectCharacter++;
       }
       let currentlyCorrectWord = true;
+      this.currentCharIndex = this.input.length;
       for (const [index, char] of this.firstSentence[
         this.currentWordIndex
       ].entries()) {
@@ -2198,6 +2203,7 @@ export default defineComponent({
         this.switchSentences();
       }
       this.input = "";
+      this.currentCharIndex = 0;
       if (this.$store.state.highlightError) {
         this.inputError = false;
       }
