@@ -1,8 +1,6 @@
 <template>
   <div class="flex justify-center my-14 text-4xl">
-    <a href="http://127.0.0.1:5500/index.html"
-      >Fast<span class="text-blue-500">Finger</span>s</a
-    >
+    <a href="./">Fast<span class="text-blue-500">Finger</span>s</a>
   </div>
   <div class="flex flex-col space-y-4 max-w-4xl mx-auto p-10">
     <typing-test @finished="showStats"></typing-test>

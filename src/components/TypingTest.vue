@@ -8,7 +8,7 @@
       :location="currentSentenceLocation"
       :success="currentSentenceSuccess"
       :row="currentWordIndex"
-      :col="currentCharIndex"
+      :col="nextCharIndex"
     ></typing-sentence>
     <typing-sentence
       :sentence="secondSentence"
@@ -2044,7 +2044,7 @@ export default defineComponent({
       currentSentenceLocation: [[false]],
       currentSentenceSuccess: [[false]],
       currentWordIndex: 0,
-      currentCharIndex: 0,
+      nextCharIndex: 0,
       timerSeconds: 0,
       timePast: 0,
       finished: false,
@@ -2092,13 +2092,13 @@ export default defineComponent({
       }
     },
     input(newVal: string, oldVal: string) {
-      if (!this.running) {
+      if (!this.running && newVal != "") {
         this.running = true;
         this.countDownTimer();
       }
       const lastChar = newVal.charAt(newVal.length - 1);
       if (lastChar != " ") {
-        this.currentCharIndex = newVal.length;
+        this.nextCharIndex = newVal.length;
         if (
           this.firstSentence[this.currentWordIndex][newVal.length - 1] ==
             newVal[newVal.length - 1] &&
@@ -2187,17 +2187,17 @@ export default defineComponent({
   },
   methods: {
     initialize(): void {
+      this.running = false;
       this.firstSentence = this.generateSentence();
       this.secondSentence = this.generateSentence();
       this.currentSentenceLocation = this.generateStructer(this.firstSentence);
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
-      this.running = false;
       this.finished = false;
       this.inputError = false;
       this.timerSeconds = this.$store.state.timerSeconds;
       this.timePast = 0;
       this.currentWordIndex = 0;
-      this.currentCharIndex = 0;
+      this.nextCharIndex = 0;
       this.correctCharacter = 0;
       this.incorrectCharacter = 0;
       this.input = "";
@@ -2213,14 +2213,14 @@ export default defineComponent({
       this.firstSentence = this.secondSentence;
       this.secondSentence = this.generateSentence();
       this.currentWordIndex = 0;
-      this.currentCharIndex = 0;
+      this.nextCharIndex = 0;
       this.currentSentenceLocation = this.generateStructer(this.firstSentence);
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
     },
     countDownTimer(): void {
       if (this.timerSeconds > 0) {
         setTimeout(() => {
-          if (!this.running) {
+          if (this.running) {
             this.timerSeconds--;
             this.timePast++;
             this.countDownTimer();

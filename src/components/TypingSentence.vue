@@ -6,7 +6,7 @@
           char
         }}</span>
       </template>
-      <span>&nbsp;</span>
+      <span :class="characterStyling(i1, sentence[i1].length)">&nbsp;</span>
     </template>
   </h1>
 </template>
@@ -29,34 +29,47 @@ export default defineComponent({
     },
     characterStyling(i1: number, i2: number) {
       const mode = this.$store.state.highlightStyle;
+      if (i1 != this.row) {
+        return {};
+      }
       if (mode == "caret") {
-        if (i1 == this.row && i2 == this.col) {
+        if (i2 == this.col) {
           return {
             "border-l-2 border-l-slate-200": true,
           };
         }
-        if (
-          this.sentence[i1].length - 1 < this.col &&
-          i1 == this.row &&
-          i2 == this.col - 1
-        ) {
+        if (this.sentence[i1].length - 1 < this.col && i2 == this.col - 1) {
           return {
             "border-r-2 border-r-slate-200": true,
           };
         }
-      } else if (mode == "word") {
-        if (i1 == this.row && i2 == this.col) {
+      } else if (mode == "character") {
+        if (i2 == this.col) {
           return {
             "bg-neutral-700 rounded-sm": true,
           };
         }
         if (
-          this.sentence[i1].length - 1 < this.col &&
-          i1 == this.row &&
-          i2 == this.col - 1
+          this.sentence[this.row] &&
+          i2 == this.sentence[this.row].length &&
+          this.col >= this.sentence[this.row].length
         ) {
           return {
             "bg-neutral-700 rounded-sm": true,
+          };
+        }
+      } else if (mode == "word") {
+        if (i2 == 0) {
+          return {
+            "bg-neutral-700 rounded-l-sm": true,
+          };
+        } else if (i2 == this.sentence[this.row].length - 1) {
+          return {
+            "bg-neutral-700 rounded-r-sm": true,
+          };
+        } else if (i2 < this.sentence[this.row].length) {
+          return {
+            "bg-neutral-700": true,
           };
         }
       }
