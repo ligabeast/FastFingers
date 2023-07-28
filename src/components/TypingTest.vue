@@ -17,8 +17,6 @@
   </div>
   <div class="flex h-12 space-x-4">
     <input
-      @keyup="test"
-      @keyup.space="testSpace"
       autocomplete="off"
       ref="input"
       v-model="input"
@@ -47,7 +45,7 @@
         <span v-if="$store.state.showTimer"> {{ timer }} </span>
       </div>
       <button
-        @click="generateTest"
+        @click="initialize"
         id="generateTest"
         class="rounded-sm bg-neutral-900 flex justify-center items-center w-24 hover:bg-blue-500 transition"
       >
@@ -2058,6 +2056,7 @@ export default defineComponent({
       incorrectCharacter: 0,
     };
   },
+  emits: ["finished"],
   watch: {
     finished(val: boolean): void {
       if (val) {
@@ -2090,6 +2089,76 @@ export default defineComponent({
     timerVuex(val: number) {
       if (!this.running) {
         this.timerSeconds = val;
+      }
+    },
+    input(newVal: string, oldVal: string) {
+      if (!this.running) {
+        this.running = true;
+        this.countDownTimer();
+      }
+      const lastChar = newVal.charAt(newVal.length - 1);
+      if (lastChar != " ") {
+        this.currentCharIndex = newVal.length;
+        if (
+          this.firstSentence[this.currentWordIndex][newVal.length - 1] ==
+            newVal[newVal.length - 1] &&
+          newVal.length > oldVal.length &&
+          !this.currentSentenceSuccess[this.currentWordIndex][newVal.length - 1]
+        ) {
+          this.correctCharacter++;
+        }
+        if (
+          this.firstSentence[this.currentWordIndex][newVal.length - 1] !=
+            newVal[newVal.length - 1] &&
+          newVal.length > oldVal.length
+        ) {
+          this.incorrectCharacter++;
+        }
+        let currentlyCorrectWord = true;
+        for (const [index, char] of this.firstSentence[
+          this.currentWordIndex
+        ].entries()) {
+          if (newVal[index] != char && newVal.length > index) {
+            currentlyCorrectWord = false;
+          }
+          if (
+            !this.currentSentenceSuccess[this.currentWordIndex][index] &&
+            newVal[index] == char
+          ) {
+            this.currentSentenceSuccess[this.currentWordIndex][index] = true;
+          }
+
+          if (newVal.length - 1 < index) {
+            this.currentSentenceLocation[this.currentWordIndex][index] = false;
+          } else {
+            this.currentSentenceLocation[this.currentWordIndex][index] = true;
+          }
+        }
+        if (this.$store.state.highlightError && !currentlyCorrectWord) {
+          this.inputError = true;
+        } else if (this.$store.state.highlightError) {
+          this.inputError = false;
+        }
+      } else {
+        let completedSentence =
+          this.currentWordIndex == this.firstSentence.length - 1;
+        if (!completedSentence) {
+          for (const [i, _] of this.currentSentenceLocation[
+            this.currentWordIndex
+          ].entries()) {
+            if (!this.currentSentenceLocation[this.currentWordIndex][i]) {
+              this.currentSentenceLocation[this.currentWordIndex][i] = true;
+              this.incorrectCharacter++;
+            }
+          }
+          this.currentWordIndex++;
+        } else {
+          this.switchSentences();
+        }
+        this.input = "";
+        if (this.$store.state.highlightError) {
+          this.inputError = false;
+        }
       }
     },
   },
@@ -2137,81 +2206,21 @@ export default defineComponent({
         inputfield.disabled = false;
       }
     },
-
+    isAlphanumeric(str: string) {
+      return str.match(/^[a-zA-Z0-9]+$/) !== null;
+    },
     switchSentences() {
       this.firstSentence = this.secondSentence;
       this.secondSentence = this.generateSentence();
       this.currentWordIndex = 0;
+      this.currentCharIndex = 0;
       this.currentSentenceLocation = this.generateStructer(this.firstSentence);
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
-    },
-    test(event: KeyboardEvent): void {
-      console.log(event);
-      if (!this.running) {
-        this.running = true;
-        this.countDownTimer();
-      }
-      if (
-        event.keyCode >= 65 &&
-        event.keyCode <= 90 &&
-        this.firstSentence[this.currentWordIndex][this.input.length - 1] ==
-          this.input[this.input.length - 1]
-      ) {
-        this.correctCharacter++;
-      }
-      if (
-        event.keyCode >= 65 &&
-        event.keyCode <= 90 &&
-        this.firstSentence[this.currentWordIndex][this.input.length - 1] !=
-          this.input[this.input.length - 1]
-      ) {
-        this.incorrectCharacter++;
-      }
-      let currentlyCorrectWord = true;
-      this.currentCharIndex = this.input.length;
-      for (const [index, char] of this.firstSentence[
-        this.currentWordIndex
-      ].entries()) {
-        if (this.input[index] != char && this.input.length > index) {
-          currentlyCorrectWord = false;
-        }
-        this.currentSentenceSuccess[this.currentWordIndex][index] =
-          this.input[index] == char;
-        if (this.input.length - 1 < index) {
-          this.currentSentenceLocation[this.currentWordIndex][index] = false;
-        } else {
-          this.currentSentenceLocation[this.currentWordIndex][index] = true;
-        }
-      }
-      if (this.$store.state.highlightError && !currentlyCorrectWord) {
-        this.inputError = true;
-      } else if (this.$store.state.highlightError) {
-        this.inputError = false;
-      }
-    },
-    testSpace() {
-      let completedSentence =
-        this.currentWordIndex == this.firstSentence.length - 1;
-      if (!completedSentence) {
-        for (const [i, _] of this.currentSentenceLocation[
-          this.currentWordIndex
-        ].entries()) {
-          this.currentSentenceLocation[this.currentWordIndex][i] = true;
-        }
-        this.currentWordIndex++;
-      } else {
-        this.switchSentences();
-      }
-      this.input = "";
-      this.currentCharIndex = 0;
-      if (this.$store.state.highlightError) {
-        this.inputError = false;
-      }
     },
     countDownTimer(): void {
       if (this.timerSeconds > 0) {
         setTimeout(() => {
-          if (this.running) {
+          if (!this.running) {
             this.timerSeconds--;
             this.timePast++;
             this.countDownTimer();
@@ -2220,9 +2229,6 @@ export default defineComponent({
       } else {
         this.finished = true;
       }
-    },
-    generateTest(): void {
-      this.initialize();
     },
     generateSentence(): string[][] {
       const sentence: string[][] = [];
