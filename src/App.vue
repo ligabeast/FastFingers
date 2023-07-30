@@ -2,11 +2,16 @@
   <div class="flex justify-center my-14 text-4xl">
     <a href="./">Fast<span class="text-blue-500">Finger</span>s</a>
   </div>
-  <div class="flex flex-col space-y-4 max-w-4xl mx-auto p-10">
-    <typing-test @finished="showStats"></typing-test>
+  <div class="flex flex-col space-y-6 justify-center items-center p-10">
+    <div class="max-w-6xl flex flex-col space-y-5">
+      <typing-test @finished="showStats" />
+    </div>
     <div class="flex space-x-4 pt-10 items-center">
-      <statistic-view :stats="stats"></statistic-view>
-      <configuration-view></configuration-view>
+      <statistic-view :stats="stats" />
+      <configuration-view />
+    </div>
+    <div class="w-[80%] max-w-7xl">
+      <statistic-chart />
     </div>
   </div>
 </template>
@@ -16,6 +21,7 @@ import { defineComponent } from "vue";
 import ConfigurationView from "./components/ConfigurationView.vue";
 import StatisticView from "./components/StatisticView.vue";
 import TypingTest from "./components/TypingTest.vue";
+import StatisticChart from "./components/StatisticChart.vue";
 
 export default defineComponent({
   name: "App",
@@ -23,6 +29,7 @@ export default defineComponent({
     TypingTest,
     StatisticView,
     ConfigurationView,
+    StatisticChart,
   },
   data() {
     return {

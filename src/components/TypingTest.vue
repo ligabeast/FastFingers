@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import TypingSentence from "./TypingSentence.vue";
+import TypingSentence from "./part_components/TypingSentence.vue";
 
 export default defineComponent({
   props: ["timerSecondsRef"],
