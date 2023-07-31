@@ -1,33 +1,56 @@
 <template>
-  <LineChart :chartData="data" :options="chartOptions"></LineChart>
+  <LineChart
+    :key="componentKey"
+    :chartData="data"
+    :options="chartOptions"
+  ></LineChart>
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, reactive, ref, watch, toRefs } from "vue";
 import { registerables, Chart } from "chart.js";
 import { LineChart } from "vue-chart-3";
 
 export default defineComponent({
   components: { LineChart },
-  setup() {
-    const wordsCompleted = ["'year'", "'car'", "'baran'", "'armin'", "'help'"];
-    const incorrectCharacters = [3, 4, 1, 5, 6];
-    const sectionWPM = [2, 24, 41, 65, 16];
-    const continuousWPM = [32, 14, 61, 45, 16];
-    const data = {
-      labels: wordsCompleted,
+  props: {
+    words: {
+      type: Array,
+      validator: (prop) => prop.every((e) => typeof e === "string"),
+    },
+    incorrectCharacters: {
+      type: Array,
+      validator: (prop) => prop.every((e) => typeof e === "number"),
+    },
+    sectionWPM: {
+      type: Array,
+      validator: (prop) => prop.every((e) => typeof e === "number"),
+    },
+    continuousWPM: {
+      type: Array,
+      validator: (prop) => prop.every((e) => typeof e === "number"),
+    },
+  },
+  setup(props) {
+    const { incorrectCharacters } = toRefs(props);
+    const { words } = toRefs(props);
+    const { continuousWPM } = toRefs(props);
+    const { sectionWPM } = toRefs(props);
+    let data = ref({
+      labels: words,
       datasets: [
         {
           label: "Incorrect Characters",
           data: incorrectCharacters,
           pointBackgroundColor: "black",
           fill: false,
-          showLine: false, //<- set this
+          showLine: false,
           yAxisID: "y1",
           pointStyle: "crossRot",
           borderColor: "red",
           pointRadius: 5,
           borderWidth: 2,
+          spanGaps: false,
         },
         {
           label: "Section WPM",
@@ -46,7 +69,7 @@ export default defineComponent({
           lineTension: 0.3,
         },
       ],
-    };
+    });
 
     const noData = {
       id: "noData",
@@ -57,9 +80,7 @@ export default defineComponent({
           chartArea: { top, left, width, height },
         } = chart;
         ctx.save();
-        console.log("HELLO");
-        if (data.datasets.length === 0) {
-          console.log("HELLO");
+        if (data.labels.length === 0) {
           ctx.font = "bold 20px cagliostro";
           ctx.fillStyle = "white";
           ctx.textAlign = "center";
@@ -71,16 +92,16 @@ export default defineComponent({
         }
       },
     };
-
     Chart.register(...registerables, noData);
 
-    const chartOptions = {
+    const chartOptions = ref({
       title: {
         display: true,
         text: "Complete a test to see your WPM history",
       },
       maintainAspectRatio: false,
       responsive: true,
+      skipNull: true,
       plugins: {
         legend: {
           display: false,
@@ -155,16 +176,30 @@ export default defineComponent({
               size: 14,
               weight: "bolder",
             },
-            stepSize: 20,
             beginAtZero: true,
+            callback: function (label) {
+              // when the floored value is the same as the value we have a whole number
+              if (Math.floor(label) === label) {
+                return label;
+              }
+            },
           },
         },
       },
-    };
+    });
+
+    let componentKey = ref(0);
+
+    watch(props, () => {
+      data.value.datasets[0].data.forEach((value, index, arr) => {
+        arr[index] = value === 0 ? null : value;
+      });
+    });
 
     return {
       chartOptions,
       data,
+      componentKey,
     };
   },
 });

@@ -2054,6 +2054,14 @@ export default defineComponent({
       correctCharacter: 0,
       inputError: false,
       incorrectCharacter: 0,
+      statisticChart: {
+        words: [] as string[],
+        incorrectCharacters: [] as number[],
+        sectionWPM: [] as number[],
+        continuousWPM: [] as number[],
+      },
+      timerSection: 0,
+      correctCharactersSection: 0,
     };
   },
   emits: ["finished"],
@@ -2083,7 +2091,17 @@ export default defineComponent({
           rawWPM: rawWPM,
           wpm: wpm,
         };
-        this.$emit("finished", stats);
+        this.$emit("finished", stats, this.statisticChart);
+        this.statisticChart.continuousWPM[
+          this.statisticChart.continuousWPM.length - 1
+        ] = Number(wpm);
+        const wpmSection = (
+          (this.correctCharactersSection / this.averageWordLength) *
+          (6000 / this.timerSection)
+        ).toFixed(2);
+        this.statisticChart.sectionWPM[
+          this.statisticChart.sectionWPM.length - 1
+        ] = Number(wpmSection);
       }
     },
     timerVuex(val: number) {
@@ -2095,10 +2113,41 @@ export default defineComponent({
       if (!this.running && newVal != "") {
         this.running = true;
         this.countDownTimer();
+        this.countUpTimer();
       }
       const lastChar = newVal.charAt(newVal.length - 1);
       if (lastChar != " ") {
         this.nextCharIndex = newVal.length;
+        if (this.nextCharIndex - 1 === 0 && newVal.length > oldVal.length) {
+          if (this.statisticChart.words.length > 0) {
+            const wpm = Number(
+              (
+                (this.correctCharacter / this.averageWordLength) *
+                (6000 / this.timePast)
+              ).toFixed(2)
+            );
+            this.statisticChart.continuousWPM[
+              this.statisticChart.continuousWPM.length - 1
+            ] = wpm;
+            const wpmSection = Number(
+              (
+                (this.correctCharactersSection / this.averageWordLength) *
+                (6000 / this.timerSection)
+              ).toFixed(2)
+            );
+            this.statisticChart.sectionWPM[
+              this.statisticChart.sectionWPM.length - 1
+            ] = wpmSection;
+            this.timerSection = 0;
+          }
+          this.correctCharactersSection = 0;
+          this.statisticChart.words.push(
+            "'" + this.firstSentence[this.currentWordIndex].join("") + "'"
+          );
+          this.statisticChart.incorrectCharacters.push(0);
+          this.statisticChart.sectionWPM.push(0);
+          this.statisticChart.continuousWPM.push(0);
+        }
         if (
           this.firstSentence[this.currentWordIndex][newVal.length - 1] ==
             newVal[newVal.length - 1] &&
@@ -2106,6 +2155,7 @@ export default defineComponent({
           !this.currentSentenceSuccess[this.currentWordIndex][newVal.length - 1]
         ) {
           this.correctCharacter++;
+          this.correctCharactersSection++;
         }
         if (
           this.firstSentence[this.currentWordIndex][newVal.length - 1] !=
@@ -2113,6 +2163,9 @@ export default defineComponent({
           newVal.length > oldVal.length
         ) {
           this.incorrectCharacter++;
+          this.statisticChart.incorrectCharacters[
+            this.statisticChart.incorrectCharacters.length - 1
+          ]++;
         }
         let currentlyCorrectWord = true;
         for (const [index, char] of this.firstSentence[
@@ -2179,7 +2232,7 @@ export default defineComponent({
       if (this.timePast > 0) {
         return Math.floor(
           (this.correctCharacter / this.averageWordLength) *
-            (60 / this.timePast)
+            (6000 / this.timePast)
         );
       }
       return 0;
@@ -2199,8 +2252,16 @@ export default defineComponent({
       this.currentWordIndex = 0;
       this.nextCharIndex = 0;
       this.correctCharacter = 0;
+      this.timerSection = 0;
+      this.correctCharactersSection = 0;
       this.incorrectCharacter = 0;
       this.input = "";
+      this.statisticChart = {
+        words: [] as string[],
+        incorrectCharacters: [] as number[],
+        sectionWPM: [] as number[],
+        continuousWPM: [] as number[],
+      };
       const inputfield = this.$refs["input"] as HTMLInputElement;
       if (inputfield) {
         inputfield.disabled = false;
@@ -2222,13 +2283,21 @@ export default defineComponent({
         setTimeout(() => {
           if (this.running) {
             this.timerSeconds--;
-            this.timePast++;
             this.countDownTimer();
           }
         }, 1000);
       } else {
         this.finished = true;
       }
+    },
+    countUpTimer(): void {
+      setTimeout(() => {
+        if (this.running && !this.finished) {
+          this.timerSection++;
+          this.timePast++;
+          this.countUpTimer();
+        }
+      }, 10);
     },
     generateSentence(): string[][] {
       const sentence: string[][] = [];

@@ -35,12 +35,12 @@ export default defineComponent({
       if (mode == "caret") {
         if (i2 == this.col) {
           return {
-            "border-l-2 border-l-slate-200": true,
+            "border-l-2 border-l-neutral-700": true,
           };
         }
         if (this.sentence[i1].length - 1 < this.col && i2 == this.col - 1) {
           return {
-            "border-r-2 border-r-slate-200": true,
+            "border-r-2 border-r-neutral-700": true,
           };
         }
       } else if (mode == "character") {

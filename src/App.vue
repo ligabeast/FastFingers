@@ -11,7 +11,7 @@
       <configuration-view />
     </div>
     <div class="w-[80%] max-w-7xl">
-      <statistic-chart />
+      <statistic-chart v-bind="statsChart" />
     </div>
   </div>
 </template>
@@ -34,17 +34,27 @@ export default defineComponent({
   data() {
     return {
       stats: {},
+      statsChart: {},
     };
   },
   methods: {
-    showStats(stats: {
-      correctChar: number;
-      incorrectChar: number;
-      accuracy: number;
-      rawWPM: number;
-      wpm: number;
-    }) {
+    showStats(
+      stats: {
+        correctChar: number;
+        incorrectChar: number;
+        accuracy: number;
+        rawWPM: number;
+        wpm: number;
+      },
+      statsChart: {
+        words: string[];
+        incorrectCharacters: number[];
+        sectionWPM: number[];
+        continuousWPM: number[];
+      }
+    ) {
       this.stats = stats;
+      this.statsChart = statsChart;
     },
   },
 });
