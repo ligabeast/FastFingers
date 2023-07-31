@@ -2070,26 +2070,21 @@ export default defineComponent({
       if (val) {
         const inputfield = this.$refs["input"] as HTMLInputElement;
         inputfield.disabled = true;
-        const accuracy = (
-          (this.correctCharacter /
-            (this.correctCharacter + this.incorrectCharacter)) *
-          100
-        ).toFixed(2);
 
         const stats = {
           correctChar: this.correctCharacter,
           incorrectChar: this.incorrectCharacter,
-          accuracy: accuracy,
+          accuracy: this.accuracy,
           rawWPM: this.rawWPM,
           wpm: this.wpm,
         };
-        this.$emit("finished", stats, this.statisticChart);
         this.statisticChart.continuousWPM[
           this.statisticChart.continuousWPM.length - 1
         ] = this.wpm;
         this.statisticChart.sectionWPM[
           this.statisticChart.sectionWPM.length - 1
         ] = this.wpmSection;
+        this.$emit("finished", stats, this.statisticChart);
       }
     },
     timerVuex(val: number) {
@@ -2105,7 +2100,7 @@ export default defineComponent({
       const lastChar = newVal.charAt(newVal.length - 1);
       if (lastChar != " ") {
         this.nextCharIndex = newVal.length;
-        this.manageStatisticChart(newVal, oldVal);
+        this.manageStatisticChart(lastChar, newVal, oldVal);
         this.checkLastCharacter(lastChar, newVal, oldVal);
         let currentlyCorrectWord = true;
         for (const [index, char] of this.firstSentence[
@@ -2127,11 +2122,7 @@ export default defineComponent({
             this.currentSentenceLocation[this.currentWordIndex][index] = true;
           }
         }
-        if (this.$store.state.highlightError && !currentlyCorrectWord) {
-          this.inputError = true;
-        } else if (this.$store.state.highlightError) {
-          this.inputError = false;
-        }
+        this.manageHighlighting(currentlyCorrectWord);
       } else {
         let completedSentence =
           this.currentWordIndex == this.firstSentence.length - 1;
@@ -2149,9 +2140,7 @@ export default defineComponent({
           this.switchSentences();
         }
         this.input = "";
-        if (this.$store.state.highlightError) {
-          this.inputError = false;
-        }
+        this.manageHighlighting(true);
       }
     },
   },
@@ -2161,6 +2150,18 @@ export default defineComponent({
         return Number(
           (this.correctCharactersSection / this.averageWordLength) *
             (6000 / this.timerSection)
+        );
+      }
+      return 0;
+    },
+    accuracy(): number {
+      if (this.correctCharacter + this.incorrectCharacter > 0) {
+        return Number(
+          (
+            (this.correctCharacter /
+              (this.correctCharacter + this.incorrectCharacter)) *
+            100
+          ).toFixed(2)
         );
       }
       return 0;
@@ -2230,9 +2231,6 @@ export default defineComponent({
         inputfield.disabled = false;
       }
     },
-    isAlphanumeric(str: string) {
-      return str.match(/^[a-zA-Z0-9]+$/) !== null;
-    },
     switchSentences() {
       this.firstSentence = this.secondSentence;
       this.secondSentence = this.generateSentence();
@@ -2241,10 +2239,17 @@ export default defineComponent({
       this.currentSentenceLocation = this.generateStructer(this.firstSentence);
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
     },
+    manageHighlighting(currentlyCorrectWord: boolean) {
+      if (this.$store.state.highlightError && !currentlyCorrectWord) {
+        this.inputError = true;
+      } else if (this.$store.state.highlightError) {
+        this.inputError = false;
+      }
+    },
     checkLastCharacter(lastChar: string, newVal: string, oldVal: string): void {
       if (
         this.firstSentence[this.currentWordIndex][newVal.length - 1] ==
-          newVal[newVal.length - 1] &&
+          lastChar &&
         newVal.length > oldVal.length &&
         !this.currentSentenceSuccess[this.currentWordIndex][newVal.length - 1]
       ) {
@@ -2253,27 +2258,18 @@ export default defineComponent({
       }
       if (
         this.firstSentence[this.currentWordIndex][newVal.length - 1] !=
-          newVal[newVal.length - 1] &&
+          lastChar &&
         newVal.length > oldVal.length
       ) {
         this.incorrectCharacter++;
-        this.statisticChart.incorrectCharacters[
-          this.statisticChart.incorrectCharacters.length - 1
-        ]++;
       }
     },
-    manageStatisticChart(newVal: string, oldVal: string) {
+    manageStatisticChart(lastChar: string, newVal: string, oldVal: string) {
       if (this.nextCharIndex - 1 === 0 && newVal.length > oldVal.length) {
         if (this.statisticChart.words.length > 0) {
-          const wpm = Number(
-            (
-              (this.correctCharacter / this.averageWordLength) *
-              (6000 / this.timePast)
-            ).toFixed(2)
-          );
           this.statisticChart.continuousWPM[
             this.statisticChart.continuousWPM.length - 1
-          ] = wpm;
+          ] = this.wpm;
 
           this.statisticChart.sectionWPM[
             this.statisticChart.sectionWPM.length - 1
@@ -2287,6 +2283,15 @@ export default defineComponent({
         this.statisticChart.incorrectCharacters.push(0);
         this.statisticChart.sectionWPM.push(0);
         this.statisticChart.continuousWPM.push(0);
+      }
+      if (
+        this.firstSentence[this.currentWordIndex][newVal.length - 1] !=
+          lastChar &&
+        newVal.length > oldVal.length
+      ) {
+        this.statisticChart.incorrectCharacters[
+          this.statisticChart.incorrectCharacters.length - 1
+        ]++;
       }
     },
     countDownTimer(): void {
