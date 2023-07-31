@@ -34,7 +34,7 @@
       >
         <div class="flex space-x-1 items-center justify-center">
           <template v-if="$store.state.showWPM">
-            <span>{{ Math.floor(wpm) }} </span>
+            <span>{{ wpmLiveCounter }} </span>
             <span class="text-lg">WMP</span>
           </template>
         </div>
@@ -2177,6 +2177,17 @@ export default defineComponent({
     },
     timerVuex(): number {
       return this.$store.state.timerDuration;
+    },
+    wpmLiveCounter(): number {
+      if (this.timePast > 0) {
+        return Number(
+          (
+            (this.correctCharacter / this.averageWordLength) *
+            (60 / Math.ceil(this.timePast / 100))
+          ).toFixed(0)
+        );
+      }
+      return 0;
     },
     wpm(): number {
       if (this.timePast > 0) {
