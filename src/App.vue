@@ -13,6 +13,7 @@
     <div class="w-[80%] max-w-7xl">
       <statistic-chart v-bind="statsChart" />
     </div>
+    <leader-board />
   </div>
 </template>
 
@@ -22,6 +23,7 @@ import ConfigurationView from "./components/ConfigurationView.vue";
 import StatisticView from "./components/StatisticView.vue";
 import TypingTest from "./components/TypingTest.vue";
 import StatisticChart from "./components/StatisticChart.vue";
+import LeaderBoard from "./components/LeaderBoard.vue";
 
 export default defineComponent({
   name: "App",
@@ -30,6 +32,7 @@ export default defineComponent({
     StatisticView,
     ConfigurationView,
     StatisticChart,
+    LeaderBoard,
   },
   data() {
     return {
