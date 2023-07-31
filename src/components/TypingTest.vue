@@ -34,7 +34,7 @@
       >
         <div class="flex space-x-1 items-center justify-center">
           <template v-if="$store.state.showWPM">
-            <span>{{ wpm }} </span>
+            <span>{{ Math.floor(wpm) }} </span>
             <span class="text-lg">WMP</span>
           </template>
         </div>
@@ -2045,7 +2045,7 @@ export default defineComponent({
       currentSentenceSuccess: [[false]],
       currentWordIndex: 0,
       nextCharIndex: 0,
-      timerSeconds: 0,
+      timerDuration: 0,
       timePast: 0,
       finished: false,
       running: false,
@@ -2075,98 +2075,38 @@ export default defineComponent({
             (this.correctCharacter + this.incorrectCharacter)) *
           100
         ).toFixed(2);
-        const rawWPM = (
-          ((this.correctCharacter + this.incorrectCharacter) /
-            this.averageWordLength) *
-          (60 / this.$store.state.timerSeconds)
-        ).toFixed(2);
-        const wpm = (
-          (this.correctCharacter / this.averageWordLength) *
-          (60 / this.$store.state.timerSeconds)
-        ).toFixed(2);
+
         const stats = {
           correctChar: this.correctCharacter,
           incorrectChar: this.incorrectCharacter,
           accuracy: accuracy,
-          rawWPM: rawWPM,
-          wpm: wpm,
+          rawWPM: this.rawWPM,
+          wpm: this.wpm,
         };
         this.$emit("finished", stats, this.statisticChart);
         this.statisticChart.continuousWPM[
           this.statisticChart.continuousWPM.length - 1
-        ] = Number(wpm);
-        const wpmSection = (
-          (this.correctCharactersSection / this.averageWordLength) *
-          (6000 / this.timerSection)
-        ).toFixed(2);
+        ] = this.wpm;
         this.statisticChart.sectionWPM[
           this.statisticChart.sectionWPM.length - 1
-        ] = Number(wpmSection);
+        ] = this.wpmSection;
       }
     },
     timerVuex(val: number) {
       if (!this.running) {
-        this.timerSeconds = val;
+        this.timerDuration = val;
       }
     },
     input(newVal: string, oldVal: string) {
       if (!this.running && newVal != "") {
         this.running = true;
         this.countDownTimer();
-        this.countUpTimer();
       }
       const lastChar = newVal.charAt(newVal.length - 1);
       if (lastChar != " ") {
         this.nextCharIndex = newVal.length;
-        if (this.nextCharIndex - 1 === 0 && newVal.length > oldVal.length) {
-          if (this.statisticChart.words.length > 0) {
-            const wpm = Number(
-              (
-                (this.correctCharacter / this.averageWordLength) *
-                (6000 / this.timePast)
-              ).toFixed(2)
-            );
-            this.statisticChart.continuousWPM[
-              this.statisticChart.continuousWPM.length - 1
-            ] = wpm;
-            const wpmSection = Number(
-              (
-                (this.correctCharactersSection / this.averageWordLength) *
-                (6000 / this.timerSection)
-              ).toFixed(2)
-            );
-            this.statisticChart.sectionWPM[
-              this.statisticChart.sectionWPM.length - 1
-            ] = wpmSection;
-            this.timerSection = 0;
-          }
-          this.correctCharactersSection = 0;
-          this.statisticChart.words.push(
-            "'" + this.firstSentence[this.currentWordIndex].join("") + "'"
-          );
-          this.statisticChart.incorrectCharacters.push(0);
-          this.statisticChart.sectionWPM.push(0);
-          this.statisticChart.continuousWPM.push(0);
-        }
-        if (
-          this.firstSentence[this.currentWordIndex][newVal.length - 1] ==
-            newVal[newVal.length - 1] &&
-          newVal.length > oldVal.length &&
-          !this.currentSentenceSuccess[this.currentWordIndex][newVal.length - 1]
-        ) {
-          this.correctCharacter++;
-          this.correctCharactersSection++;
-        }
-        if (
-          this.firstSentence[this.currentWordIndex][newVal.length - 1] !=
-            newVal[newVal.length - 1] &&
-          newVal.length > oldVal.length
-        ) {
-          this.incorrectCharacter++;
-          this.statisticChart.incorrectCharacters[
-            this.statisticChart.incorrectCharacters.length - 1
-          ]++;
-        }
+        this.manageStatisticChart(newVal, oldVal);
+        this.checkLastCharacter(lastChar, newVal, oldVal);
         let currentlyCorrectWord = true;
         for (const [index, char] of this.firstSentence[
           this.currentWordIndex
@@ -2216,23 +2156,46 @@ export default defineComponent({
     },
   },
   computed: {
+    wpmSection(): number {
+      if (this.timePast > 0) {
+        return Number(
+          (this.correctCharactersSection / this.averageWordLength) *
+            (6000 / this.timerSection)
+        );
+      }
+      return 0;
+    },
     timer(): string {
-      let time = Math.floor(this.timerSeconds / 60).toString();
+      let time = Math.floor(this.timerDuration / 6000).toString();
       time += ":";
       time +=
-        this.timerSeconds % 60 >= 10
-          ? (this.timerSeconds % 60).toString()
-          : "0" + (this.timerSeconds % 60).toString();
+        Math.ceil((this.timerDuration / 100) % 60) >= 10
+          ? Math.ceil((this.timerDuration / 100) % 60).toString()
+          : "0" + Math.ceil((this.timerDuration / 100) % 60).toString();
       return time;
     },
     timerVuex(): number {
-      return this.$store.state.timerSeconds;
+      return this.$store.state.timerDuration;
     },
     wpm(): number {
       if (this.timePast > 0) {
-        return Math.floor(
-          (this.correctCharacter / this.averageWordLength) *
+        return Number(
+          (
+            (this.correctCharacter / this.averageWordLength) *
             (6000 / this.timePast)
+          ).toFixed(2)
+        );
+      }
+      return 0;
+    },
+    rawWPM(): number {
+      if (this.timePast > 0) {
+        return Number(
+          (
+            ((this.correctCharacter + this.incorrectCharacter) /
+              this.averageWordLength) *
+            (6000 / this.$store.state.timerDuration)
+          ).toFixed(2)
         );
       }
       return 0;
@@ -2247,7 +2210,7 @@ export default defineComponent({
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
       this.finished = false;
       this.inputError = false;
-      this.timerSeconds = this.$store.state.timerSeconds;
+      this.timerDuration = this.$store.state.timerDuration;
       this.timePast = 0;
       this.currentWordIndex = 0;
       this.nextCharIndex = 0;
@@ -2278,26 +2241,67 @@ export default defineComponent({
       this.currentSentenceLocation = this.generateStructer(this.firstSentence);
       this.currentSentenceSuccess = this.generateStructer(this.firstSentence);
     },
+    checkLastCharacter(lastChar: string, newVal: string, oldVal: string): void {
+      if (
+        this.firstSentence[this.currentWordIndex][newVal.length - 1] ==
+          newVal[newVal.length - 1] &&
+        newVal.length > oldVal.length &&
+        !this.currentSentenceSuccess[this.currentWordIndex][newVal.length - 1]
+      ) {
+        this.correctCharacter++;
+        this.correctCharactersSection++;
+      }
+      if (
+        this.firstSentence[this.currentWordIndex][newVal.length - 1] !=
+          newVal[newVal.length - 1] &&
+        newVal.length > oldVal.length
+      ) {
+        this.incorrectCharacter++;
+        this.statisticChart.incorrectCharacters[
+          this.statisticChart.incorrectCharacters.length - 1
+        ]++;
+      }
+    },
+    manageStatisticChart(newVal: string, oldVal: string) {
+      if (this.nextCharIndex - 1 === 0 && newVal.length > oldVal.length) {
+        if (this.statisticChart.words.length > 0) {
+          const wpm = Number(
+            (
+              (this.correctCharacter / this.averageWordLength) *
+              (6000 / this.timePast)
+            ).toFixed(2)
+          );
+          this.statisticChart.continuousWPM[
+            this.statisticChart.continuousWPM.length - 1
+          ] = wpm;
+
+          this.statisticChart.sectionWPM[
+            this.statisticChart.sectionWPM.length - 1
+          ] = this.wpmSection;
+          this.timerSection = 0;
+        }
+        this.correctCharactersSection = 0;
+        this.statisticChart.words.push(
+          "'" + this.firstSentence[this.currentWordIndex].join("") + "'"
+        );
+        this.statisticChart.incorrectCharacters.push(0);
+        this.statisticChart.sectionWPM.push(0);
+        this.statisticChart.continuousWPM.push(0);
+      }
+    },
     countDownTimer(): void {
-      if (this.timerSeconds > 0) {
+      if (this.timerDuration > 0) {
         setTimeout(() => {
           if (this.running) {
-            this.timerSeconds--;
+            this.timerDuration--;
+            this.timerSection++;
+            this.timePast++;
             this.countDownTimer();
           }
-        }, 1000);
+        }, 10);
       } else {
         this.finished = true;
       }
-    },
-    countUpTimer(): void {
-      setTimeout(() => {
-        if (this.running && !this.finished) {
-          this.timerSection++;
-          this.timePast++;
-          this.countUpTimer();
-        }
-      }, 10);
     },
     generateSentence(): string[][] {
       const sentence: string[][] = [];

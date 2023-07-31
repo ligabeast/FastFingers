@@ -4,32 +4,32 @@
       <span>Test Duration</span>
       <div class="flex text-neutral-500">
         <span
-          @click="setTime(10)"
-          :class="{ 'bg-neutral-800 text-white': timeClass.time10 }"
+          @click="setTime(1000)"
+          :class="{ 'bg-neutral-800 text-white': timeClass.time1000 }"
           class="px-2 rounded-xl hover:text-white transition cursor-pointer"
           >0:10</span
         >
         <span
-          @click="setTime(30)"
-          :class="{ 'bg-neutral-800 text-white': timeClass.time30 }"
+          @click="setTime(3000)"
+          :class="{ 'bg-neutral-800 text-white': timeClass.time3000 }"
           class="px-2 rounded-xl hover:text-white transition cursor-pointer"
           >0:30</span
         >
         <span
-          @click="setTime(60)"
-          :class="{ 'bg-neutral-800 text-white': timeClass.time60 }"
+          @click="setTime(6000)"
+          :class="{ 'bg-neutral-800 text-white': timeClass.time6000 }"
           class="px-2 rounded-xl hover:text-white transition cursor-pointer"
           >1:00</span
         >
         <span
-          @click="setTime(120)"
-          :class="{ 'bg-neutral-800 text-white': timeClass.time120 }"
+          @click="setTime(12000)"
+          :class="{ 'bg-neutral-800 text-white': timeClass.time12000 }"
           class="px-2 rounded-xl hover:text-white transition cursor-pointer"
           >2:00</span
         >
         <span
-          @click="setTime(300)"
-          :class="{ 'bg-neutral-800 text-white': timeClass.time300 }"
+          @click="setTime(30000)"
+          :class="{ 'bg-neutral-800 text-white': timeClass.time30000 }"
           class="px-2 rounded-xl hover:text-white transition cursor-pointer"
           >5:00</span
         >
@@ -150,11 +150,11 @@ export default defineComponent({
   data() {
     return {
       timeClass: {
-        time10: true,
-        time30: false,
-        time60: false,
-        time120: false,
-        time300: false,
+        time1000: true,
+        time3000: false,
+        time6000: false,
+        time12000: false,
+        time30000: false,
       },
       HighlightStyleClass: {
         character: true,

@@ -6,7 +6,7 @@ import { createStore } from "vuex";
 const store = createStore({
   state() {
     return {
-      timerSeconds: 10,
+      timerDuration: 1000,
       showTimer: true,
       showWPM: true,
       highlightError: true,
@@ -16,7 +16,7 @@ const store = createStore({
   },
   mutations: {
     changeTimer(state: any, time: number): void {
-      state.timerSeconds = time;
+      state.timerDuration = time;
     },
     changeVisibilityTimer(state: any, value: boolean): void {
       state.showTimer = value;
