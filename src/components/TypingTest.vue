@@ -2062,6 +2062,7 @@ export default defineComponent({
       },
       timerSection: 0,
       correctCharactersSection: 0,
+      currentWordMaximumIndex: -1,
     };
   },
   emits: ["finished"],
@@ -2081,6 +2082,15 @@ export default defineComponent({
         this.statisticChart.continuousWPM[
           this.statisticChart.continuousWPM.length - 1
         ] = this.wpm;
+        console.log(
+          "word:",
+          this.firstSentence[this.currentWordIndex].join("")
+        );
+        console.log("time", this.timerSection);
+        console.log("correct Char:", this.correctCharactersSection);
+        if (this.timerSection < 10) {
+          this.timerSection = 10;
+        }
         this.statisticChart.sectionWPM[
           this.statisticChart.sectionWPM.length - 1
         ] = this.wpmSection;
@@ -2136,6 +2146,7 @@ export default defineComponent({
             }
           }
           this.currentWordIndex++;
+          this.currentWordMaximumIndex = -1;
         } else {
           this.switchSentences();
         }
@@ -2237,6 +2248,7 @@ export default defineComponent({
         sectionWPM: [] as number[],
         continuousWPM: [] as number[],
       };
+      this.currentWordMaximumIndex = -1;
       const inputfield = this.$refs["input"] as HTMLInputElement;
       if (inputfield) {
         inputfield.disabled = false;
@@ -2276,7 +2288,7 @@ export default defineComponent({
       }
     },
     manageStatisticChart(lastChar: string, newVal: string, oldVal: string) {
-      if (this.nextCharIndex - 1 === 0 && newVal.length > oldVal.length) {
+      if (this.nextCharIndex - 1 === 0 && this.currentWordMaximumIndex == -1) {
         if (this.statisticChart.words.length > 0) {
           this.statisticChart.continuousWPM[
             this.statisticChart.continuousWPM.length - 1
@@ -2286,8 +2298,8 @@ export default defineComponent({
             this.statisticChart.sectionWPM.length - 1
           ] = this.wpmSection;
           this.timerSection = 0;
+          this.correctCharactersSection = 0;
         }
-        this.correctCharactersSection = 0;
         this.statisticChart.words.push(
           "'" + this.firstSentence[this.currentWordIndex].join("") + "'"
         );
@@ -2303,6 +2315,9 @@ export default defineComponent({
         this.statisticChart.incorrectCharacters[
           this.statisticChart.incorrectCharacters.length - 1
         ]++;
+      }
+      if (this.currentWordMaximumIndex < newVal.length - 1) {
+        this.currentWordMaximumIndex = newVal.length - 1;
       }
     },
     countDownTimer(): void {
