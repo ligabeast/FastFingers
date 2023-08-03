@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col space-y-4 max-w-4xl w-full">
     <div class="flex flex-row justify-between font-semibold">
-      <p>Daily Leaderboard</p>
+      <p>Top 10 Scoreboard</p>
       <p class="text-neutral-500">Resets in 2 hours</p>
     </div>
     <div class="font-semibold">
@@ -36,7 +36,7 @@ export default defineComponent({
     const leaderboard = ref({});
     const { promise } = useCollection(collection(db, "leaderboard"));
     promise.value.then((place) => {
-      const data = place[0].allTime as { wpm: number; name: string }[];
+      const data = place[0].alltime as { wpm: number; name: string }[];
       data.sort((a, b) => b.wpm - a.wpm);
       leaderboard.value = data;
     });

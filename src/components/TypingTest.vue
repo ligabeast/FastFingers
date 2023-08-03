@@ -81,10 +81,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import TypingSentence from "./part_components/TypingSentence.vue";
-import ShareResults from "@components/ShareResults.vue";
-import { useFirestore } from "vuefire";
-import { useCollection } from "vuefire";
-import { collection } from "firebase/firestore";
+import ShareResults from "./ShareResults.vue";
+import { useFirestore, useCollection } from "vuefire";
+import { doc, setDoc, collection } from "firebase/firestore";
 
 export default defineComponent({
   props: ["timerSecondsRef"],
@@ -2267,16 +2266,25 @@ export default defineComponent({
         inputfield.disabled = false;
       }
     },
-    sendData() {
+    sendData(name: string) {
       const db = useFirestore();
-      const leaderboard = {};
+      const obj = {
+        name,
+        wpm: this.wpm,
+      };
       const { promise } = useCollection(collection(db, "leaderboard"));
       promise.value.then((place) => {
-        const data = place[0].allTime as { wpm: number; name: string }[];
+        let data = place[0].alltime as { wpm: number; name: string }[];
+        data.push(obj);
         data.sort((a, b) => b.wpm - a.wpm);
-        leaderboard.value = data;
+        if (data.length > 10) {
+          data = data.slice(0, 10);
+        }
+        setDoc(doc(db, "leaderboard", "kF7uKEd4Hj8H5pmUUmCj"), {
+          alltime: data,
+        });
       });
-      return { leaderboard };
+      this.showShareView = false;
     },
     switchSentences() {
       this.firstSentence = this.secondSentence;
