@@ -1,4 +1,9 @@
 <template>
+  <share-results
+    v-if="showShareView"
+    @shareResults="sendData"
+    @closeShareView="showShareView = false"
+  ></share-results>
   <div
     class="bg-neutral-900 font-roboto rounded-sm py-4 px-8 text-2xl h-24 tracking-wider"
   >
@@ -76,11 +81,16 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import TypingSentence from "./part_components/TypingSentence.vue";
+import ShareResults from "@components/ShareResults.vue";
+import { useFirestore } from "vuefire";
+import { useCollection } from "vuefire";
+import { collection } from "firebase/firestore";
 
 export default defineComponent({
   props: ["timerSecondsRef"],
   components: {
     TypingSentence,
+    ShareResults,
   },
   data() {
     return {
@@ -2063,6 +2073,7 @@ export default defineComponent({
       timerSection: 0,
       correctCharactersSection: 0,
       currentWordMaximumIndex: -1,
+      showShareView: false,
     };
   },
   emits: ["finished"],
@@ -2095,6 +2106,7 @@ export default defineComponent({
           this.statisticChart.sectionWPM.length - 1
         ] = this.wpmSection;
         this.$emit("finished", stats, this.statisticChart);
+        this.showShareView = true;
       }
     },
     timerVuex(val: number) {
@@ -2107,6 +2119,7 @@ export default defineComponent({
         this.running = true;
         this.countDownTimer();
       }
+
       const lastChar = newVal.charAt(newVal.length - 1);
       if (lastChar != " ") {
         this.nextCharIndex = newVal.length;
@@ -2254,6 +2267,17 @@ export default defineComponent({
         inputfield.disabled = false;
       }
     },
+    sendData() {
+      const db = useFirestore();
+      const leaderboard = {};
+      const { promise } = useCollection(collection(db, "leaderboard"));
+      promise.value.then((place) => {
+        const data = place[0].allTime as { wpm: number; name: string }[];
+        data.sort((a, b) => b.wpm - a.wpm);
+        leaderboard.value = data;
+      });
+      return { leaderboard };
+    },
     switchSentences() {
       this.firstSentence = this.secondSentence;
       this.secondSentence = this.generateSentence();
@@ -2371,5 +2395,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style></style>

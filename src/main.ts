@@ -2,6 +2,8 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./assets/tailwind.css";
 import { createStore } from "vuex";
+import { VueFire, VueFireDatabaseOptionsAPI } from "vuefire";
+import firebaseApp from "./firestore";
 
 const store = createStore({
   state() {
@@ -39,4 +41,8 @@ const store = createStore({
 const app = createApp(App);
 
 app.use(store);
+app.use(VueFire, {
+  firebaseApp,
+  modules: [VueFireDatabaseOptionsAPI()],
+});
 app.mount("#app");

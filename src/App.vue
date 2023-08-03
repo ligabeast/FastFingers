@@ -24,6 +24,7 @@ import StatisticView from "./components/StatisticView.vue";
 import TypingTest from "./components/TypingTest.vue";
 import StatisticChart from "./components/StatisticChart.vue";
 import LeaderBoard from "./components/LeaderBoard.vue";
+import ShareResults from "./components/ShareResults.vue";
 
 export default defineComponent({
   name: "App",
