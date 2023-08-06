@@ -2265,6 +2265,13 @@ export default defineComponent({
       if (inputfield) {
         inputfield.disabled = false;
       }
+      //focus on input field
+      this.$nextTick(() => {
+        const inputfield = this.$refs["input"] as HTMLInputElement;
+        if (inputfield) {
+          inputfield.focus();
+        }
+      });
     },
     sendData(name: string) {
       const db = useFirestore();
