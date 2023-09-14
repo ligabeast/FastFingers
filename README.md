@@ -48,17 +48,17 @@ To run the Vue WPM Tracker locally, follow these steps:
 
 ## Usage
 
-1. Enter a piece of text in the input field.
+1. Enter a piece of text in the input field -> starts the test
 
-2. Click the "Start" button to begin the WPM measurement.
+2. By typing a space the current word will be skipped
 
 3. Type the given text as quickly and accurately as possible.
 
-4. When finished, click the "Stop" button to end the measurement.
+4. When the timer is expired the calculated WPM value will be displayed, and the result will be added to the graph.
 
-5. The calculated WPM value will be displayed, and the result will be added to the graph.
+5. You can view your WPM history and statistics on the dashboard.
 
-6. You can view your WPM history and statistics on the dashboard.
+6. If you broke the top10 wpm you get a notification if you want to add your test to the top10 (currently the wpm is not checked, so you will be notify in every test end)
 
 ## Technologies Used
 
