@@ -1,9 +1,11 @@
 # FastFingers Vue WPM Tracker
-# https://fastfingers-2a437.web.app/
 
 ## Description
 
 The Vue WPM Tracker is a web-based application inspired by TypeTest that allows users to measure their Words Per Minute (WPM) while typing. The application records WPM values and visualizes them in an informative graph. It leverages a Firebase database in the backend to store and manage the data.
+
+## Visit
+https://fastfingers-2a437.web.app/
 
 ## Features
 
