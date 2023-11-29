@@ -1,6 +1,8 @@
 <template>
   <share-results
     v-if="showShareView"
+    :activationWPM="activationWPM"
+    :scoredWPM="wpm"
     @shareResults="sendData"
     @closeShareView="showShareView = false"
   ></share-results>
@@ -2073,6 +2075,7 @@ export default defineComponent({
       correctCharactersSection: 0,
       currentWordMaximumIndex: -1,
       showShareView: false,
+      top10: [{}] as { wpm: number; name: string }[],
     };
   },
   emits: ["finished"],
@@ -2177,6 +2180,12 @@ export default defineComponent({
       }
       return 0;
     },
+    activationWPM(): number {
+      if (this.top10.length < 10) {
+        return 0;
+      }
+      return this.top10[this.top10.length - 1].wpm;
+    },
     accuracy(): number {
       if (this.correctCharacter + this.incorrectCharacter > 0) {
         return Number(
@@ -2271,6 +2280,14 @@ export default defineComponent({
         if (inputfield) {
           inputfield.focus();
         }
+      });
+    },
+    async getData() {
+      const db = useFirestore();
+      const { promise } = useCollection(collection(db, "leaderboard"));
+      promise.value.then((place) => {
+        let data = place[0].alltime as { wpm: number; name: string }[];
+        this.top10 = data;
       });
     },
     sendData(name: string) {
@@ -2407,6 +2424,7 @@ export default defineComponent({
   },
   created(): void {
     this.initialize();
+    this.getData();
   },
 });
 </script>

@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="activationWPM < scoredWPM"
     class="z-50 fixed left-0 top-0 bg-black opacity-90 w-full h-full flex justify-center items-center"
   >
     <div
@@ -62,9 +63,9 @@
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
+  props: ["activationWPM", "scoredWPM"],
   setup() {
     const input = ref("");
-
     return { input };
   },
 });

@@ -2,7 +2,7 @@
   <div class="flex flex-col space-y-4 max-w-4xl w-full">
     <div class="flex flex-row justify-between font-semibold">
       <p>Top 10 Scoreboard</p>
-      <p class="text-neutral-500">Resets in 2 hours</p>
+      <p class="text-neutral-500">Resets in X hours</p>
     </div>
     <div class="font-semibold">
       <div class="flex flex-row px-4 py-2 rounded-md bg-neutral-900">
